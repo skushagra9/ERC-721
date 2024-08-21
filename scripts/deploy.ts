@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import hre from 'hardhat';
+import { upgrades } from "hardhat";
 
 async function main() {
   // Get the ContractFactory and Signers here.
@@ -9,8 +10,10 @@ async function main() {
   console.log("Deploying contracts with the account:", deployer.address);
 
   // Deploy the contract
-  const erc404AI = await ERC404AI.deploy() as unknown as ethers.Contract; // Type assertion
-  console.log("ERC404AI deployed to:", erc404AI.deploymentTransaction(), erc404AI.getAddress());
+  const erc404AI = await upgrades.deployProxy(ERC404AI, [], {
+    initializer: 'initialize',
+  });
+  console.log("ERC404AI deployed to:",  await erc404AI.getAddress());
 
   // Wait for deployment to be mined
   await erc404AI.waitForDeployment();

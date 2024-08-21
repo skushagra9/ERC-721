@@ -1,11 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract ERC404AI is ERC721URIStorage, Ownable, ReentrancyGuard {
+contract ERC404AI is
+    Initializable,
+    ERC721URIStorageUpgradeable,
+    OwnableUpgradeable,
+    ReentrancyGuardUpgradeable
+{
     uint256 public tokenCounter;
 
     struct Metadata {
@@ -21,8 +27,19 @@ contract ERC404AI is ERC721URIStorage, Ownable, ReentrancyGuard {
     mapping(uint256 => Metadata) private tokenIdToMetadata;
 
     event MetadataUpdated(uint256 indexed tokenId);
+    event PositionTransferred(uint256 indexed tokenId, address indexed from, address indexed to);
 
-    constructor() ERC721("AI Agent NFT", "AIA") {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize() public initializer {
+        __ERC721_init("AI Agent NFT", "AIA");
+        __ERC721URIStorage_init();
+        __Ownable_init();
+        __ReentrancyGuard_init();
+
         tokenCounter = 0;
     }
 
@@ -62,9 +79,10 @@ contract ERC404AI is ERC721URIStorage, Ownable, ReentrancyGuard {
 
         tokenCounter++;
     }
-    
-     // Function to get metadata for a specific token ID
+
+    // Function to get metadata for a specific token ID
     function getTokenId(uint256 tokenId) public view returns (Metadata memory) {
+        require(_exists(tokenId), "ERC404: token ID not found");
         return tokenIdToMetadata[tokenId];
     }
 
@@ -76,6 +94,20 @@ contract ERC404AI is ERC721URIStorage, Ownable, ReentrancyGuard {
      * @param _capabilities Updated list of skills or functions the AI agent can perform.
      * @param _version Updated version of the AI agent.
      */
+
+     /**
+     * @dev Allows the owner to transfer the NFT to another address.
+     * @param tokenId ID of the NFT to transfer.
+     * @param to Address of the recipient.
+     */
+    function transferPosition(uint256 tokenId, address to) external nonReentrant {
+        require(_exists(tokenId), "ERC404: token ID not found");
+        require(ownerOf(tokenId) == msg.sender, "Only the owner can transfer the token");
+
+        _transfer(msg.sender, to, tokenId);
+        emit PositionTransferred(tokenId, msg.sender, to);
+    }
+
     function updateMetadata(
         uint256 tokenId,
         string memory _description,
@@ -83,7 +115,10 @@ contract ERC404AI is ERC721URIStorage, Ownable, ReentrancyGuard {
         string[] memory _capabilities,
         string memory _version
     ) external nonReentrant {
-        require(ownerOf(tokenId) == msg.sender, "Only the owner can update the metadata");
+        require(
+            ownerOf(tokenId) == msg.sender,
+            "Only the owner can update the metadata"
+        );
 
         Metadata storage metadata = tokenIdToMetadata[tokenId];
         metadata.description = _description;
@@ -102,25 +137,37 @@ contract ERC404AI is ERC721URIStorage, Ownable, ReentrancyGuard {
      * @dev Allows the owner to destroy the NFT.
      * @param tokenId ID of the NFT to burn.
      */
-function burn(uint256 tokenId) external nonReentrant {
-    require(_exists(tokenId), "ERC404: token ID not found"); // Check if the token exists
-    require(ownerOf(tokenId) == msg.sender, "Only the owner can burn the token");
-    
-    _burn(tokenId);
-    delete tokenIdToMetadata[tokenId];
-    emit Transfer(msg.sender, address(0), tokenId);
-}
+    function burn(uint256 tokenId) external nonReentrant {
+        require(_exists(tokenId), "ERC404: token ID not found"); // Check if the token exists
+        require(
+            ownerOf(tokenId) == msg.sender,
+            "Only the owner can burn the token"
+        );
+
+        _burn(tokenId);
+        delete tokenIdToMetadata[tokenId];
+        emit Transfer(msg.sender, address(0), tokenId);
+    }
 
     /**
      * @dev Generates a token URI pointing to the metadata JSON file.
      * @param tokenId ID of the NFT.
      * @return URI string representing the token metadata.
      */
-    function generateTokenURI(uint256 tokenId) internal view returns (string memory) {
+    function generateTokenURI(
+        uint256 tokenId
+    ) internal view returns (string memory) {
         Metadata memory metadata = tokenIdToMetadata[tokenId];
         // Normally you'd host the metadata off-chain and return the URL here
         // For simplicity, returning a basic string, but this should be an actual URI
-        return string(abi.encodePacked("https://example.com/metadata/", uint2str(tokenId), ".json"));
+        return
+            string(
+                abi.encodePacked(
+                    "https://example.com/metadata/",
+                    uint2str(tokenId),
+                    ".json"
+                )
+            );
     }
 
     /**

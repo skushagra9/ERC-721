@@ -7,10 +7,16 @@
     "typechain": "^8.3.2"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.9.5",
+    "@helia/json": "^3.0.5",
+    "@openzeppelin/contracts-upgradeable": "^4.8.0",
+    "@openzeppelin/hardhat-upgrades": "^3.2.1",
     "@typechain/ethers-v6": "^0.5.1",
     "@types/dotenv": "^8.2.0",
     "dotenv": "^16.4.5",
-    "ethers": "^6.13.2"
+    "ethers": "^6.13.2",
+    "helia": "^4.2.5",
+    "ipfs-core": "^0.18.1",
+    "ipfs-http-client": "^60.0.1",
+    "nft.storage": "^7.2.0"
   }
 }

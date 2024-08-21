@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { ERC404AI } from "../typechain-types";
-import hre from 'hardhat'
+import hre from 'hardhat';
+import { upgrades } from "hardhat";
 
 describe("ERC404AI", function () {
   let erc404AI: ERC404AI;
@@ -11,9 +12,20 @@ describe("ERC404AI", function () {
   beforeEach(async function () {
     [owner, addr1, addr2] = await hre.ethers.getSigners();
 
-    const ERC404AI = await hre.ethers.getContractFactory("ERC404AI");
-    erc404AI = await ERC404AI.deploy();
+    const ERC404AIFactory = await hre.ethers.getContractFactory("ERC404AI");
+    
+    // Deploy the contract using the upgradeable proxy
+    erc404AI = await upgrades.deployProxy(ERC404AIFactory, [], {
+      initializer: 'initialize',
+    }) as unknown as ERC404AI;
+
+    // Wait for the contract to be deployed
     await erc404AI.waitForDeployment();
+  });
+
+  // Example test case
+  it("should have the correct owner", async function () {
+    expect(await erc404AI.owner()).to.equal(owner.address);
   });
 
   it("Should mint a new AI agent NFT", async function () {
@@ -38,6 +50,22 @@ describe("ERC404AI", function () {
     expect(tokenMetadata.version).to.equal(version);
   });
 
+  it("Should transfer an existing AI agent NFT", async function () {
+    const name = "AI Agent 1";
+    const description = "Description of AI Agent 1";
+    const image = "https://example.com/image.png";
+    const capabilities = ["skill1", "skill2"];
+    const version = "1.0.0";
+
+    await erc404AI.mintAI(name, description, image, capabilities, version);
+
+    await expect(
+      erc404AI.transferPosition(0, addr1.address)
+    ).to.emit(erc404AI, "PositionTransferred");
+
+    expect(await erc404AI.ownerOf(0)).to.equal(addr1.address);
+  });
+  
   it("Should update the metadata of an existing AI agent NFT", async function () {
     const name = "AI Agent 1";
     const description = "Description of AI Agent 1";
@@ -72,13 +100,13 @@ describe("ERC404AI", function () {
     const version = "3.0.0";
 
     await erc404AI.mintAI(name, description, image, capabilities, version);
+    // Verify token exists
+    const dataOld = await erc404AI.getTokenId(0);
+    console.log("OldData", dataOld);
 
     // Burn the token
-    await expect(erc404AI.burn(0)).to.emit(erc404AI, "Transfer");
-
-    // Check that querying the token metadata results in a revert
-    await expect(erc404AI.getTokenId(0)).to.be.revertedWith(
-      "ERC404: token ID not found"
-    );
+    await expect(erc404AI.burn(0)).to.emit(erc404AI, "Transfer")
+    // Verify token metadata has been removed
+    await expect(erc404AI.getTokenId(0)).to.be.revertedWith("ERC404: token ID not found");
   });
 });
