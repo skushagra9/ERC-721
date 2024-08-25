@@ -1,25 +1,25 @@
-# ERC404AI Project
+# ERC721AI Project
 
 ## Overview
 
-The **ERC404AI** project is an upgradeable smart contract implementation for ERC-721 tokens with extended functionalities. This contract allows for the creation, management, and transfer of AI agent NFTs. It utilizes OpenZeppelin's upgradeable contracts to ensure upgradability and security. 
+The **ERC721AI** project is an upgradeable smart contract implementation for ERC-721 tokens with extended functionalities. This contract allows for the creation, management, and transfer of AI agent NFTs. It utilizes OpenZeppelin's upgradeable contracts to ensure upgradability and security. 
 
 ## Deployment Details
 
-The `ERC404AI` contract has been successfully deployed to the Holesky network. Below are the details of the deployment:
+The `ERC721AI` contract has been successfully deployed to the sepolia network. Below are the details of the deployment:
 
 - **Deployer Account**: `0x6fd6E5fCfB4f526AeC218079aDeC118a7F3A6540`
-- **Contract Address**: `0x2E3Ab2E824dE1175B94B925F6A6A482Cf6FAAA59`
-- **Transaction Link**: [View on Holesky Scan](https://holesky.etherscan.io/tx/0xc4a75e8f82cad4286781fe10259df82d2bbbee3b1c1de7e540c72eae17b91243)
+- **Contract Address**: `0xCD2187Ddc853ea10358Eba78c4d1DF2a80Dfb7c3`
+- **Transaction Link**: [View on Sepolia Scan](https://sepolia.etherscan.io/tx/0x59d4ca5cf674a26340ac545852e2183eead42aa8d392cd5b576858abf3811749)
 
-The contract is now live and can be interacted with on the Holesky test network.
+The contract is now live and can be interacted with on the Sepolia test network.
 
 
 ## Contract Description
 
-### ERC404AI Contract
+### ERC721AI Contract
 
-The `ERC404AI` contract extends OpenZeppelin's `ERC721URIStorageUpgradeable`, `OwnableUpgradeable`, and `ReentrancyGuardUpgradeable` contracts. It allows for:
+The `ERC721AI` contract extends OpenZeppelin's `ERC721URIStorageUpgradeable`, `OwnableUpgradeable`, and `ReentrancyGuardUpgradeable` contracts. It allows for:
 
 - **Minting AI Agent NFTs**: Create new NFTs with specific metadata including name, description, image, capabilities, and version.
 - **Metadata Management**: Update the metadata of existing NFTs.
@@ -111,7 +111,7 @@ The `ERC404AI` contract extends OpenZeppelin's `ERC721URIStorageUpgradeable`, `O
 
 ## Testing Scripts
 
-The testing scripts validate the functionality and security of the `ERC404AI` contract. Below is an overview of what is tested:
+The testing scripts validate the functionality and security of the `ERC721AI` contract. Below is an overview of what is tested:
 
 ### **Deployment**
 
@@ -170,17 +170,17 @@ OldData Result(7) [
 ·············|····················|··············|·············|·············|···············|··············
 |  Contract  ·  Method            ·  Min         ·  Max        ·  Avg        ·  # calls      ·  usd (avg)  │
 ·············|····················|··············|·············|·············|···············|··············
-|  ERC404AI  ·  burn              ·           -  ·          -  ·      94060  ·            2  ·          -  │
+|  ERC721AI  ·  burn              ·           -  ·          -  ·      94060  ·            2  ·          -  │
 ·············|····················|··············|·············|·············|···············|··············
-|  ERC404AI  ·  mintAI            ·      388458  ·     413391  ·     393445  ·            5  ·          -  │
+|  ERC721AI  ·  mintAI            ·      388458  ·     413391  ·     393445  ·            5  ·          -  │
 ·············|····················|··············|·············|·············|···············|··············
-|  ERC404AI  ·  transferPosition  ·           -  ·          -  ·      65127  ·            2  ·          -  │
+|  ERC721AI  ·  transferPosition  ·           -  ·          -  ·      65127  ·            2  ·          -  │
 ·············|····················|··············|·············|·············|···············|··············
-|  ERC404AI  ·  updateMetadata    ·           -  ·          -  ·     136010  ·            2  ·          -  │
+|  ERC721AI  ·  updateMetadata    ·           -  ·          -  ·     136010  ·            2  ·          -  │
 ·············|····················|··············|·············|·············|···············|··············
 |  Deployments                    ·                                          ·  % of limit   ·             │
 ··································|··············|·············|·············|···············|··············
-|  ERC404AI                       ·           -  ·          -  ·    4490423  ·         15 %  ·          -  │
+|  ERC721AI                       ·           -  ·          -  ·    4490423  ·         15 %  ·          -  │
 ·---------------------------------|--------------|-------------|-------------|---------------|-------------·
 
   5 passing (944ms)
@@ -188,13 +188,13 @@ OldData Result(7) [
 
 ## Deployment
 
-To deploy the `ERC404AI` contract, you can use the provided deployment script. This script deploys the contract using an upgradeable proxy setup. Ensure you have Hardhat and OpenZeppelin's upgrades package installed.
+To deploy the `ERC721AI` contract, you can use the provided deployment script. This script deploys the contract using an upgradeable proxy setup. Ensure you have Hardhat and OpenZeppelin's upgrades package installed.
 
 
 ## Deploy Commands:
 
 ```shell
-npx hardhat run scripts/deploy.ts --network holesky
+npx hardhat run scripts/deploy.ts --network sepolia
 ```
 
 ### Deployment Script
@@ -206,20 +206,20 @@ import { upgrades } from "hardhat";
 
 async function main() {
   // Get the ContractFactory and Signers here.
-  const ERC404AI = await hre.ethers.getContractFactory("ERC404AI");
+  const ERC721AI = await hre.ethers.getContractFactory("ERC721AI");
   const [deployer] = await hre.ethers.getSigners();
 
   console.log("Deploying contracts with the account:", deployer.address);
 
   // Deploy the contract
-  const erc404AI = await upgrades.deployProxy(ERC404AI, [], {
+  const ERC721AI = await upgrades.deployProxy(ERC721AI, [], {
     initializer: 'initialize',
   });
-  console.log("ERC404AI deployed to:",  await erc404AI.getAddress());
+  console.log("ERC721AI deployed to:",  await ERC721AI.getAddress());
 
   // Wait for deployment to be mined
-  await erc404AI.deployed();
-  console.log("ERC404AI successfully deployed!");
+  await ERC721AI.deployed();
+  console.log("ERC721AI successfully deployed!");
 }
 
 // Run the script
@@ -233,14 +233,14 @@ main()
 
 ## Upgrade Scripts
 
-Upgrading the `ERC404AI` contract involves deploying a new implementation while preserving the state of the existing proxy. The upgrade process is outlined below:
+Upgrading the `ERC721AI` contract involves deploying a new implementation while preserving the state of the existing proxy. The upgrade process is outlined below:
 
 ### **Upgrade Process**
 
-1. **Script Overview**: The upgrade script uses Hardhat to deploy a new implementation of the `ERC404AI` contract to an existing proxy.
+1. **Script Overview**: The upgrade script uses Hardhat to deploy a new implementation of the `ERC721AI` contract to an existing proxy.
 2. **Procedure**:
    - **Get Signer**: Identifies the deployer account.
-   - **Get ContractFactory**: Retrieves the factory for the new implementation of `ERC404AI`.
+   - **Get ContractFactory**: Retrieves the factory for the new implementation of `ERC721AI`.
    - **Upgrade Proxy**: Upgrades the proxy to point to the new implementation.
    - **Logging**: Outputs the address of the upgraded contract and confirms successful deployment.
 

@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract ERC404AI is
+contract ERC721AI is
     Initializable,
     ERC721URIStorageUpgradeable,
     OwnableUpgradeable,
@@ -82,7 +82,7 @@ contract ERC404AI is
 
     // Function to get metadata for a specific token ID
     function getTokenId(uint256 tokenId) public view returns (Metadata memory) {
-        require(_exists(tokenId), "ERC404: token ID not found");
+        require(_exists(tokenId), "ERC721: token ID not found");
         return tokenIdToMetadata[tokenId];
     }
 
@@ -101,7 +101,7 @@ contract ERC404AI is
      * @param to Address of the recipient.
      */
     function transferPosition(uint256 tokenId, address to) external nonReentrant {
-        require(_exists(tokenId), "ERC404: token ID not found");
+        require(_exists(tokenId), "ERC721: token ID not found");
         require(ownerOf(tokenId) == msg.sender, "Only the owner can transfer the token");
 
         _transfer(msg.sender, to, tokenId);
@@ -138,7 +138,7 @@ contract ERC404AI is
      * @param tokenId ID of the NFT to burn.
      */
     function burn(uint256 tokenId) external nonReentrant {
-        require(_exists(tokenId), "ERC404: token ID not found"); // Check if the token exists
+        require(_exists(tokenId), "ERC721: token ID not found"); // Check if the token exists
         require(
             ownerOf(tokenId) == msg.sender,
             "Only the owner can burn the token"

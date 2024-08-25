@@ -23,9 +23,13 @@ const config: HardhatUserConfig = {
   },
   networks: {
     holesky: {
-      url: process.env.HTTP_PROVIDER_URL,
+      url: process.env.HTTP_HOLESKY_PROVIDER_URL,
       accounts: [process.env.PRIVATE_KEY as string],
     },
+    sepolia:{
+      url: process.env.HTTP_SEPOLIA_PROVIDER_URL,
+      accounts: [process.env.PRIVATE_KEY as string],
+    }
   },
   gasReporter: { enabled: true },
 };

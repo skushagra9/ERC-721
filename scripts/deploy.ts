@@ -1,23 +1,22 @@
-import { ethers } from "ethers";
 import hre from 'hardhat';
 import { upgrades } from "hardhat";
 
 async function main() {
   // Get the ContractFactory and Signers here.
-  const ERC404AI = await hre.ethers.getContractFactory("ERC404AI");
+  const erc721 = await hre.ethers.getContractFactory("ERC721AI");
   const [deployer] = await hre.ethers.getSigners();
 
   console.log("Deploying contracts with the account:", deployer.address);
 
   // Deploy the contract
-  const erc404AI = await upgrades.deployProxy(ERC404AI, [], {
+  const ERC721AI = await upgrades.deployProxy(erc721, [], {
     initializer: 'initialize',
   });
-  console.log("ERC404AI deployed to:",  await erc404AI.getAddress());
+  console.log("ERC721AI deployed to:", await ERC721AI.getAddress());
 
   // Wait for deployment to be mined
-  await erc404AI.waitForDeployment();
-  console.log("ERC404AI successfully deployed!");
+  await ERC721AI.waitForDeployment();
+  console.log("ERC721AI successfully deployed!");
 }
 
 // Run the script

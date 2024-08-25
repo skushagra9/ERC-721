@@ -15,6 +15,26 @@
       "address": "0x2E3Ab2E824dE1175B94B925F6A6A482Cf6FAAA59",
       "txHash": "0xc4a75e8f82cad4286781fe10259df82d2bbbee3b1c1de7e540c72eae17b91243",
       "kind": "transparent"
+    },
+    {
+      "address": "0xCD2187Ddc853ea10358Eba78c4d1DF2a80Dfb7c3",
+      "txHash": "0xab769acae1190a404eb27ac675e52870a14520596cbff875d9cc87222fd71fe3",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xBDfd876FE1576a604b34721eA72fDaDdde9D5f9e",
+      "txHash": "0x941eca08957a136abf4f3f583538c37916f00a857a30a6e0bae42fba5e621075",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x057c6Ea292A9ee40f9702F442437D9d350342611",
+      "txHash": "0x54d65d15bfee27ccc05f471723be681ec9864c3aab25a2da4e56ac324763a2b8",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xdfE1cFFBD8aD25B0f742540efE2976855EC1b001",
+      "txHash": "0xc8cdd8bc95cae4c1a76fe8c361d1894a5a798d5bd2de8542b54d9dcc79022037",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -166,16 +186,16 @@
             "offset": 0,
             "slot": "301",
             "type": "t_uint256",
-            "contract": "ERC404AI",
-            "src": "contracts/ERC404NFT.sol:15"
+            "contract": "ERC721AI",
+            "src": "contracts/ERC721NFT.sol:15"
           },
           {
             "label": "tokenIdToMetadata",
             "offset": 0,
             "slot": "302",
             "type": "t_mapping(t_uint256,t_struct(Metadata)3375_storage)",
-            "contract": "ERC404AI",
-            "src": "contracts/ERC404NFT.sol:27"
+            "contract": "ERC721AI",
+            "src": "contracts/ERC721NFT.sol:27"
           }
         ],
         "types": {
@@ -224,7 +244,7 @@
             "numberOfBytes": "32"
           },
           "t_mapping(t_uint256,t_struct(Metadata)3375_storage)": {
-            "label": "mapping(uint256 => struct ERC404AI.Metadata)",
+            "label": "mapping(uint256 => struct ERC721AI.Metadata)",
             "numberOfBytes": "32"
           },
           "t_string_storage": {
@@ -232,7 +252,7 @@
             "numberOfBytes": "32"
           },
           "t_struct(Metadata)3375_storage": {
-            "label": "struct ERC404AI.Metadata",
+            "label": "struct ERC721AI.Metadata",
             "members": [
               {
                 "label": "name",
