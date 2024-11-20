@@ -13,7 +13,7 @@ describe("ERC721AI", function () {
     [owner, addr1, addr2] = await hre.ethers.getSigners();
 
     const ERC721AIFactory = await hre.ethers.getContractFactory("ERC721AI");
-    
+
     // Deploy the contract using the upgradeable proxy
     ERC721AI = await upgrades.deployProxy(ERC721AIFactory, [], {
       initializer: 'initialize',
@@ -30,82 +30,51 @@ describe("ERC721AI", function () {
 
   it("Should mint a new AI agent NFT", async function () {
     const name = "AI Agent 1";
-    const description = "Description of AI Agent 1";
-    const image = "https://example.com/image.png";
-    const capabilities = ["skill1", "skill2"];
-    const version = "1.0.0";
-
+    const tokenURI = "https://example.com/image.png";
+    const userAddress = addr1.address;
+    await ERC721AI.setVerifiedUser(userAddress);
     await expect(
-      ERC721AI.mintAI(name, description, image, capabilities, version)
-    ).to.emit(ERC721AI, "Transfer");
+      ERC721AI.mintAI(userAddress, name, tokenURI)
+    ).to.emit(ERC721AI, "TokenMinted");
 
-    const tokenId = 0; 
+    const tokenId = 0;
     const tokenMetadata = await ERC721AI.getTokenId(tokenId);
-    
+
 
     expect(tokenMetadata.name).to.equal(name);
-    expect(tokenMetadata.description).to.equal(description);
-    expect(tokenMetadata.image).to.equal(image);
-    expect(tokenMetadata.capabilities).to.deep.equal(capabilities);
-    expect(tokenMetadata.version).to.equal(version);
+    expect(tokenMetadata.tokenURI).to.equal(tokenURI);
   });
 
   it("Should transfer an existing AI agent NFT", async function () {
     const name = "AI Agent 1";
-    const description = "Description of AI Agent 1";
-    const image = "https://example.com/image.png";
-    const capabilities = ["skill1", "skill2"];
-    const version = "1.0.0";
+    const tokenURI = "https://example.com/image.png";
+    const userAddress = addr1.address;
+    await ERC721AI.setVerifiedUser(userAddress);
+    await ERC721AI.mintAI(userAddress, name, tokenURI)
 
-    await ERC721AI.mintAI(name, description, image, capabilities, version);
-
-    await expect(
-      ERC721AI.transferPosition(0, addr1.address)
-    ).to.emit(ERC721AI, "PositionTransferred");
 
     expect(await ERC721AI.ownerOf(0)).to.equal(addr1.address);
-  });
-  
-  it("Should update the metadata of an existing AI agent NFT", async function () {
-    const name = "AI Agent 1";
-    const description = "Description of AI Agent 1";
-    const image = "https://example.com/image.png";
-    const capabilities = ["skill1", "skill2"];
-    const version = "1.0.0";
-
-    await ERC721AI.mintAI(name, description, image, capabilities, version);
-
-    const newDescription = "Updated description";
-    const newImage = "https://example.com/updated-image.png";
-    const newCapabilities = ["new-skill1"];
-    const newVersion = "1.1.0";
 
     await expect(
-      ERC721AI.updateMetadata(0, newDescription, newImage, newCapabilities, newVersion)
-    ).to.emit(ERC721AI, "MetadataUpdated");
+      ERC721AI.connect(addr1).transferPosition(0, addr2.address) 
+    ).to.emit(ERC721AI, "PositionTransferred");
 
-    const updatedMetadata = await ERC721AI.getTokenId(0);
-
-    expect(updatedMetadata.description).to.equal(newDescription);
-    expect(updatedMetadata.image).to.equal(newImage);
-    expect(updatedMetadata.capabilities).to.deep.equal(newCapabilities);
-    expect(updatedMetadata.version).to.equal(newVersion);
+    expect(await ERC721AI.ownerOf(0)).to.equal(addr2.address);
   });
 
+
   it("Should burn an existing AI agent NFT", async function () {
-    const name = "AI Agent 3";
-    const description = "Description of AI Agent 3";
-    const image = "https://example.com/image3.png";
-    const capabilities = ["skill1", "skill2", "skill3"];
-    const version = "3.0.0";
+    const name = "AI Agent 1";
+    const tokenURI = "https://example.com/image.png";
+    const userAddress = addr1.address;
+    await ERC721AI.setVerifiedUser(userAddress);
+    await ERC721AI.mintAI(userAddress, name, tokenURI)
 
-    await ERC721AI.mintAI(name, description, image, capabilities, version);
-    // Verify token exists
-    const dataOld = await ERC721AI.getTokenId(0);
-    console.log("OldData", dataOld);
+    expect(await ERC721AI.ownerOf(0)).to.equal(addr1.address);
 
-    // Burn the token
-    await expect(ERC721AI.burn(0)).to.emit(ERC721AI, "Transfer")
+    // Burn the token by addr1
+    await expect(ERC721AI.connect(addr1).burn(0)).to.emit(ERC721AI, "Transfer");
+
     // Verify token metadata has been removed
     await expect(ERC721AI.getTokenId(0)).to.be.revertedWith("ERC721: token ID not found");
   });

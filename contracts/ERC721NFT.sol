@@ -16,18 +16,20 @@ contract ERC721AI is
 
     struct Metadata {
         string name;
-        string description;
-        string image;
-        string[] capabilities;
-        string version;
+        string tokenURI;
         uint256 createdAt;
         uint256 updatedAt;
     }
 
     mapping(uint256 => Metadata) private tokenIdToMetadata;
+    mapping(address => bool) public verifiedUsers;
 
-    event MetadataUpdated(uint256 indexed tokenId);
-    event PositionTransferred(uint256 indexed tokenId, address indexed from, address indexed to);
+    event PositionTransferred(
+        uint256 indexed tokenId,
+        address indexed from,
+        address indexed to
+    );
+     event TokenMinted(uint256 indexed tokenId, address indexed to);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -43,41 +45,37 @@ contract ERC721AI is
         tokenCounter = 0;
     }
 
+    function setVerifiedUser(address user) external onlyOwner {
+        verifiedUsers[user] = true;
+    }
+
     /**
      * @dev Allows the creation of a new AI agent NFT.
      * @param _name Name of the AI agent.
-     * @param _description Description of the AI agent.
-     * @param _image URL to an image representing the AI agent.
-     * @param _capabilities List of skills or functions the AI agent can perform.
-     * @param _version Current version of the AI agent.
+     * @param _tokenURI URL to the metadata JSON file.
      * @return tokenId ID of the newly minted NFT.
      */
     function mintAI(
+        address to,
         string memory _name,
-        string memory _description,
-        string memory _image,
-        string[] memory _capabilities,
-        string memory _version
+        string memory _tokenURI
     ) external onlyOwner nonReentrant returns (uint256 tokenId) {
         tokenId = tokenCounter;
-        _safeMint(msg.sender, tokenId);
+        require(verifiedUsers[to], "User not verified");
+        _safeMint(to, tokenId);
 
         Metadata memory metadata = Metadata({
             name: _name,
-            description: _description,
-            image: _image,
-            capabilities: _capabilities,
-            version: _version,
+            tokenURI: _tokenURI,
             createdAt: block.timestamp,
             updatedAt: block.timestamp
         });
 
         tokenIdToMetadata[tokenId] = metadata;
-
-        string memory tokenURI = generateTokenURI(tokenId);
-        _setTokenURI(tokenId, tokenURI);
+        _setTokenURI(tokenId, _tokenURI);
 
         tokenCounter++;
+        emit TokenMinted(tokenId, to);
     }
 
     // Function to get metadata for a specific token ID
@@ -86,51 +84,18 @@ contract ERC721AI is
         return tokenIdToMetadata[tokenId];
     }
 
-    /**
-     * @dev Allows the owner to update the AI agent's metadata.
-     * @param tokenId ID of the NFT to update.
-     * @param _description Updated description of the AI agent.
-     * @param _image Updated URL to an image representing the AI agent.
-     * @param _capabilities Updated list of skills or functions the AI agent can perform.
-     * @param _version Updated version of the AI agent.
-     */
-
-     /**
-     * @dev Allows the owner to transfer the NFT to another address.
-     * @param tokenId ID of the NFT to transfer.
-     * @param to Address of the recipient.
-     */
-    function transferPosition(uint256 tokenId, address to) external nonReentrant {
+    function transferPosition(
+        uint256 tokenId,
+        address to
+    ) external nonReentrant {
         require(_exists(tokenId), "ERC721: token ID not found");
-        require(ownerOf(tokenId) == msg.sender, "Only the owner can transfer the token");
+        require(
+            ownerOf(tokenId) == msg.sender,
+            "Only the owner can transfer the token"
+        );
 
         _transfer(msg.sender, to, tokenId);
         emit PositionTransferred(tokenId, msg.sender, to);
-    }
-
-    function updateMetadata(
-        uint256 tokenId,
-        string memory _description,
-        string memory _image,
-        string[] memory _capabilities,
-        string memory _version
-    ) external nonReentrant {
-        require(
-            ownerOf(tokenId) == msg.sender,
-            "Only the owner can update the metadata"
-        );
-
-        Metadata storage metadata = tokenIdToMetadata[tokenId];
-        metadata.description = _description;
-        metadata.image = _image;
-        metadata.capabilities = _capabilities;
-        metadata.version = _version;
-        metadata.updatedAt = block.timestamp;
-
-        string memory tokenURI = generateTokenURI(tokenId);
-        _setTokenURI(tokenId, tokenURI);
-
-        emit MetadataUpdated(tokenId);
     }
 
     /**
@@ -147,53 +112,5 @@ contract ERC721AI is
         _burn(tokenId);
         delete tokenIdToMetadata[tokenId];
         emit Transfer(msg.sender, address(0), tokenId);
-    }
-
-    /**
-     * @dev Generates a token URI pointing to the metadata JSON file.
-     * @param tokenId ID of the NFT.
-     * @return URI string representing the token metadata.
-     */
-    function generateTokenURI(
-        uint256 tokenId
-    ) internal view returns (string memory) {
-        Metadata memory metadata = tokenIdToMetadata[tokenId];
-        // Normally you'd host the metadata off-chain and return the URL here
-        // For simplicity, returning a basic string, but this should be an actual URI
-        return
-            string(
-                abi.encodePacked(
-                    "https://example.com/metadata/",
-                    uint2str(tokenId),
-                    ".json"
-                )
-            );
-    }
-
-    /**
-     * @dev Converts a uint256 to string.
-     * @param _i The integer to convert.
-     * @return The resulting string.
-     */
-    function uint2str(uint256 _i) internal pure returns (string memory) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint256 j = _i;
-        uint256 len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint256 k = len;
-        while (_i != 0) {
-            k = k - 1;
-            uint8 temp = (48 + uint8(_i - (_i / 10) * 10));
-            bytes1 b1 = bytes1(temp);
-            bstr[k] = b1;
-            _i /= 10;
-        }
-        return string(bstr);
     }
 }
